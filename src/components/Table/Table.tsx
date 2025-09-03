@@ -46,7 +46,7 @@ export type TableProps = {
   editable?: boolean;
   selectable?: boolean;
   searchable?: boolean;
-  resizable?: boolean;
+  // resizable?: boolean;
   pagination?: PaginationProps & {
     page: number;
   };
@@ -67,8 +67,7 @@ const Table: React.FC<TableProps> = ({
   editable = false,
   selectable = false,
   searchable = false,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  resizable = false,
+  // resizable = false,
   pagination,
   scroll,
 }) => {
