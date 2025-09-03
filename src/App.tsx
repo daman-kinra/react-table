@@ -9,9 +9,21 @@ const App = () => {
 
   const columns: TableColumn[] = [
     { key: "id", title: "ID", sortable: true },
-    { key: "name", title: "Name" },
-    { key: "email", title: "Email", sortable: true },
-    { key: "active", title: "Active", type: "boolean", sortable: true },
+    { key: "name", title: "Name", type: "string", filterable: true },
+    {
+      key: "email",
+      title: "Email",
+      type: "string",
+      sortable: true,
+      filterable: true,
+    },
+    {
+      key: "active",
+      title: "Active",
+      type: "boolean",
+      sortable: true,
+      filterable: true,
+    },
     { key: "createdAt", title: "Created At", type: "date", sortable: true },
   ];
 

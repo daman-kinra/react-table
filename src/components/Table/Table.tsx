@@ -10,6 +10,7 @@ import { Button, Checkbox, Empty, Spin, type PaginationProps } from "antd";
 import Pagination from "./components/Pagination";
 import { FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
 import orderBy from "lodash/orderBy";
+import isEmpty from "lodash/isEmpty";
 
 export type TableColumn = {
   key: string;
@@ -20,6 +21,7 @@ export type TableColumn = {
   link?: string; // Only for link type
   openInNewTab?: boolean; // Only for link type
   showValueAsLinkIcon?: boolean; // Only for link type
+  filterable?: boolean;
   render?: (data: TableData) => React.ReactNode;
 };
 
@@ -50,6 +52,10 @@ export type TableProps = {
   scroll?: TableScroll;
 };
 
+export type TableFilters = {
+  [key: string]: string | boolean | [Dayjs, Dayjs];
+};
+
 const Table: React.FC<TableProps> = ({
   columns,
   data,
@@ -73,6 +79,7 @@ const Table: React.FC<TableProps> = ({
   const [sortDirection, setSortDirection] = useState<"asc" | "desc" | null>(
     null
   );
+  const [filters, setFilters] = useState<TableFilters>({});
 
   const handleCellUpdate = (
     column: TableColumn,
@@ -197,15 +204,10 @@ const Table: React.FC<TableProps> = ({
     }
   };
 
-  const renderTable = () => {
+  const getTableDataToRender = () => {
+    if (filteredTableData.length === 0) return [];
     let tableDataToRender = filteredTableData;
-    if (filteredTableData.length === 0) {
-      return (
-        <div className="w-full h-full flex justify-center items-center border border-solid border-gray-200 py-10">
-          <Empty description="No data" />
-        </div>
-      );
-    }
+
     if (pagination?.page && pagination?.pageSize) {
       const start = (pagination?.page - 1) * (pagination?.pageSize || 0);
       const end = pagination?.page * (pagination?.pageSize || 0);
@@ -216,7 +218,39 @@ const Table: React.FC<TableProps> = ({
     if (sortColumn && sortDirection) {
       tableDataToRender = orderBy(tableDataToRender, sortColumn, sortDirection);
     }
+    if (Object.keys(filters).length > 0) {
+      tableDataToRender = tableDataToRender.filter((d) => {
+        const matches: boolean[] = [];
+        Object.keys(filters).forEach((key) => {
+          const filterValue = filters[key];
+          const dValue = d[key];
+          if (typeof filterValue === "boolean" && typeof dValue === "boolean") {
+            matches.push(filterValue === dValue);
+          }
+          if (typeof filterValue === "string" && typeof dValue === "string") {
+            matches.push(
+              dValue
+                .toLowerCase()
+                .trim()
+                .includes(filterValue.toLowerCase().trim())
+            );
+          }
+        });
+        return matches.every((match) => match === true);
+      });
+    }
+    return tableDataToRender;
+  };
 
+  const renderTable = () => {
+    const tableDataToRender = getTableDataToRender();
+    if (isEmpty(tableDataToRender)) {
+      return (
+        <div className="w-full h-full flex justify-center items-center border border-solid border-gray-200 py-10">
+          <Empty description="No data" />
+        </div>
+      );
+    }
     return (
       <table
         className={clsx("min-w-full h-fit", {
@@ -384,6 +418,8 @@ const Table: React.FC<TableProps> = ({
     <div className="w-full h-full">
       <TableHeader
         searchable={searchable}
+        setFilters={setFilters}
+        filters={filters}
         columns={columns}
         setSearch={setSearch}
         search={search}
