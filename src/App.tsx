@@ -9,7 +9,7 @@ const App = () => {
 
   const columns: TableColumn[] = [
     { key: "id", title: "ID", sortable: true },
-    { key: "name", title: "Name", sortable: true },
+    { key: "name", title: "Name" },
     { key: "email", title: "Email", sortable: true },
     { key: "active", title: "Active", type: "boolean", sortable: true },
     { key: "createdAt", title: "Created At", type: "date", sortable: true },
@@ -369,7 +369,7 @@ const App = () => {
   ];
 
   return (
-    <div className="bg-gray-100 min-h-screen w-screen p-8">
+    <div className="bg-gray-100 min-h-screen w-screen h-fit p-8">
       <div className="max-w-6xl h-full mx-auto">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">
           React Table Component
@@ -383,7 +383,7 @@ const App = () => {
           deletable={true}
           searchable={true}
           selectable={true}
-          // scroll={{ x: 1500 }}
+          scroll={{ x: 1500, y: 500 }}
           pagination={{
             page: page,
             pageSize: pageSize,

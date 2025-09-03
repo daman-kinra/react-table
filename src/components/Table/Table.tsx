@@ -246,12 +246,17 @@ const Table: React.FC<TableProps> = ({
               <th
                 key={column.key}
                 className={clsx(
-                  "px-6 py-3 text-left text-base font-semibold text-gray-700 tracking-wider whitespace-nowrap cursor-pointer group",
+                  "px-6 py-3 text-left text-base font-semibold text-gray-700 tracking-wider whitespace-nowrap group",
                   {
                     "border-l border-solid border-gray-200": bordered,
+                    "cursor-pointer": column.sortable,
                   }
                 )}
-                onClick={() => handleSort(column)}
+                onClick={() => {
+                  if (column.sortable) {
+                    handleSort(column);
+                  }
+                }}
                 style={{
                   width: column.width ? `${column.width}px` : "unset",
                   maxWidth: column.width ? `${column.width}px` : "unset",
@@ -386,10 +391,13 @@ const Table: React.FC<TableProps> = ({
         handleDeleteSelected={handleDeleteSelected}
       />
       <div
-        className={clsx("w-full h-full max-w-screen max-h-screen", {
-          "overflow-x-auto": scroll?.x,
-          "overflow-y-auto": scroll?.y,
-        })}
+        className={clsx(
+          "w-full max-w-screen max-h-screen h-full overflow-y-auto",
+          {
+            "overflow-x-auto": scroll?.x,
+            "overflow-y-auto": scroll?.y,
+          }
+        )}
       >
         <div
           className="w-full h-full relative z-0"
