@@ -377,12 +377,13 @@ const App = () => {
         <Table
           columns={columns}
           data={data}
+          loading={false}
           bordered={true}
           editable={true}
           deletable={true}
           searchable={true}
           selectable={true}
-          scroll={{ x: 1500 }}
+          // scroll={{ x: 1500 }}
           pagination={{
             page: page,
             pageSize: pageSize,

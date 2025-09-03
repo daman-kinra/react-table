@@ -6,7 +6,7 @@ import BooleanCell from "./components/cells/BooleanCell";
 import DateCell from "./components/cells/DateCell";
 import TableHeader from "./components/TableHeader";
 import type { Dayjs } from "dayjs";
-import { Button, Checkbox, type PaginationProps } from "antd";
+import { Button, Checkbox, Empty, Spin, type PaginationProps } from "antd";
 import Pagination from "./components/Pagination";
 
 export type TableColumn = {
@@ -32,6 +32,7 @@ export type TableScroll = {
 export type TableProps = {
   columns: TableColumn[];
   data: TableData[];
+  loading?: boolean;
   title?: string;
   headerSticky?: boolean;
   bordered?: boolean;
@@ -49,6 +50,7 @@ export type TableProps = {
 const Table: React.FC<TableProps> = ({
   columns,
   data,
+  loading = false,
   headerSticky = true,
   bordered = false,
   deletable = false,
@@ -178,6 +180,13 @@ const Table: React.FC<TableProps> = ({
 
   const renderTable = () => {
     let tableDataToRender = filteredTableData;
+    if (filteredTableData.length === 0) {
+      return (
+        <div className="w-full h-full flex justify-center items-center border border-solid border-gray-200 py-10">
+          <Empty description="No data" />
+        </div>
+      );
+    }
     if (pagination?.page && pagination?.pageSize) {
       const start = (pagination?.page - 1) * (pagination?.pageSize || 0);
       const end = pagination?.page * (pagination?.pageSize || 0);
@@ -276,6 +285,14 @@ const Table: React.FC<TableProps> = ({
       </table>
     );
   };
+  const renderLoading = () => {
+    if (!loading) return null;
+    return (
+      <div className="absolute inset-0 flex justify-center items-center backdrop-blur-xs z-10 border border-solid border-gray-200">
+        <Spin />
+      </div>
+    );
+  };
 
   const handleSearch = () => {
     const filteredData = tableData.filter((d) => {
@@ -328,12 +345,13 @@ const Table: React.FC<TableProps> = ({
         })}
       >
         <div
-          className="w-full h-full"
+          className="w-full h-full relative z-0"
           style={{
             width: scroll?.x ? `${scroll?.x}px` : "unset",
             height: scroll?.y ? `${scroll?.y}px` : "unset",
           }}
         >
+          {renderLoading()}
           {renderTable()}
         </div>
       </div>
