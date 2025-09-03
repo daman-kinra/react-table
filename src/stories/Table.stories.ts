@@ -1,195 +1,425 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import "./table.css";
 import Table, {
   type TableColumn,
   type TableData,
 } from "../components/Table/Table";
+import dayjs from "dayjs";
+import React from "react";
+import "./table.css";
 
 // Sample data for stories
-const sampleColumns: TableColumn[] = [
-  { key: "id", header: "ID", width: "80px" },
-  { key: "name", header: "Name" },
-  { key: "email", header: "Email" },
-  { key: "role", header: "Role" },
-  { key: "status", header: "Status" },
-];
-
 const sampleData: TableData[] = [
   {
-    id: 1,
+    id: "1",
     name: "John Doe",
     email: "john.doe@example.com",
-    role: "Admin",
-    status: "Active",
+    age: 28,
+    isActive: true,
+    joinDate: dayjs("2023-01-15"),
+    department: "Engineering",
+    salary: 75000,
+    website: "https://johndoe.dev",
   },
   {
-    id: 2,
+    id: "2",
     name: "Jane Smith",
     email: "jane.smith@example.com",
-    role: "User",
-    status: "Active",
+    age: 32,
+    isActive: false,
+    joinDate: dayjs("2022-08-20"),
+    department: "Marketing",
+    salary: 65000,
+    website: "https://janesmith.com",
   },
   {
-    id: 3,
+    id: "3",
     name: "Bob Johnson",
     email: "bob.johnson@example.com",
-    role: "User",
-    status: "Inactive",
+    age: 45,
+    isActive: true,
+    joinDate: dayjs("2021-03-10"),
+    department: "Sales",
+    salary: 80000,
+    website: "https://bobjohnson.net",
   },
   {
-    id: 4,
+    id: "4",
     name: "Alice Brown",
     email: "alice.brown@example.com",
-    role: "Moderator",
-    status: "Active",
+    age: 29,
+    isActive: true,
+    joinDate: dayjs("2023-06-05"),
+    department: "Engineering",
+    salary: 72000,
+    website: "https://alicebrown.io",
+  },
+  {
+    id: "5",
+    name: "Charlie Wilson",
+    email: "charlie.wilson@example.com",
+    age: 38,
+    isActive: false,
+    joinDate: dayjs("2020-11-12"),
+    department: "HR",
+    salary: 58000,
+    website: "https://charliewilson.co",
   },
 ];
 
-const meta = {
+const basicColumns: TableColumn[] = [
+  {
+    key: "name",
+    title: "Name",
+    type: "string",
+    sortable: true,
+    filterable: true,
+  },
+  {
+    key: "email",
+    title: "Email",
+    type: "string",
+    sortable: true,
+    filterable: true,
+  },
+  {
+    key: "age",
+    title: "Age",
+    type: "number",
+    sortable: true,
+    filterable: true,
+  },
+  {
+    key: "department",
+    title: "Department",
+    type: "string",
+    sortable: true,
+    filterable: true,
+  },
+  {
+    key: "salary",
+    title: "Salary",
+    type: "number",
+    sortable: true,
+    filterable: true,
+  },
+];
+
+const meta: Meta<typeof Table> = {
   title: "Components/Table",
   component: Table,
   parameters: {
-    layout: "padded",
+    layout: "fullscreen",
+    docs: {
+      description: {
+        component:
+          "A comprehensive table component with sorting, filtering, pagination, and various cell types.",
+      },
+    },
   },
-  tags: ["autodocs"],
   argTypes: {
+    loading: {
+      control: "boolean",
+      description: "Shows loading spinner overlay",
+    },
     bordered: {
       control: "boolean",
-      description: "Whether to show borders around table cells",
+      description: "Adds borders to table cells",
     },
-    striped: {
+    selectable: {
       control: "boolean",
-      description: "Whether to show alternating row colors",
+      description: "Enables row selection with checkboxes",
     },
-    hoverable: {
+    editable: {
       control: "boolean",
-      description: "Whether to show hover effects on rows",
+      description: "Makes cells editable",
     },
-    title: {
-      control: "text",
-      description: "Optional table title",
+    deletable: {
+      control: "boolean",
+      description: "Shows delete buttons for rows",
+    },
+    searchable: {
+      control: "boolean",
+      description: "Enables search functionality",
+    },
+    headerSticky: {
+      control: "boolean",
+      description: "Makes table header sticky",
     },
   },
-} satisfies Meta<typeof Table>;
+};
 
 export default meta;
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj<typeof Table>;
 
-// Default table story
-export const Default: Story = {
+// Basic Table Story
+export const Basic: Story = {
   args: {
-    columns: sampleColumns,
+    columns: basicColumns,
     data: sampleData,
+    loading: false,
+    bordered: false,
+    selectable: false,
+    editable: false,
+    deletable: false,
+    searchable: false,
+    headerSticky: true,
   },
 };
 
-// Table with title
-export const WithTitle: Story = {
-  args: {
-    columns: sampleColumns,
-    data: sampleData,
-    title: "User Management",
-  },
-};
-
-// Bordered table
+// Bordered Table
 export const Bordered: Story = {
   args: {
-    columns: sampleColumns,
-    data: sampleData,
+    ...Basic.args,
     bordered: true,
-    title: "Bordered Table",
   },
 };
 
-// Striped table
-export const Striped: Story = {
+// Selectable Table
+export const Selectable: Story = {
   args: {
-    columns: sampleColumns,
-    data: sampleData,
-    striped: true,
-    title: "Striped Table",
+    ...Basic.args,
+    selectable: true,
   },
 };
 
-// Hoverable table
-export const Hoverable: Story = {
+// Editable Table
+export const Editable: Story = {
   args: {
-    columns: sampleColumns,
-    data: sampleData,
-    hoverable: true,
-    title: "Hoverable Table",
+    ...Basic.args,
+    editable: true,
   },
 };
 
-// All features enabled
+// Deletable Table
+export const Deletable: Story = {
+  args: {
+    ...Basic.args,
+    deletable: true,
+  },
+};
+
+// Searchable Table
+export const Searchable: Story = {
+  args: {
+    ...Basic.args,
+    searchable: true,
+  },
+};
+
+// Table with All Features
 export const FullFeatured: Story = {
   args: {
-    columns: sampleColumns,
-    data: sampleData,
+    ...Basic.args,
     bordered: true,
-    striped: true,
-    hoverable: true,
-    title: "Full Featured Table",
+    selectable: true,
+    editable: true,
+    deletable: true,
+    searchable: true,
   },
 };
 
-// Empty table
-export const Empty: Story = {
+// Table with Different Cell Types
+export const WithCellTypes: Story = {
   args: {
-    columns: sampleColumns,
-    data: [],
-    title: "Empty Table",
-  },
-};
-
-// Single row
-export const SingleRow: Story = {
-  args: {
-    columns: sampleColumns,
-    data: [sampleData[0]],
-    title: "Single Row Table",
-  },
-};
-
-// Large dataset
-export const LargeDataset: Story = {
-  args: {
-    columns: sampleColumns,
-    data: [
-      ...sampleData,
+    columns: [
       {
-        id: 5,
-        name: "Charlie Wilson",
-        email: "charlie.wilson@example.com",
-        role: "User",
-        status: "Active",
+        key: "name",
+        title: "Name",
+        type: "string",
+        sortable: true,
+        filterable: true,
       },
       {
-        id: 6,
-        name: "Diana Prince",
-        email: "diana.prince@example.com",
-        role: "Admin",
-        status: "Active",
+        key: "email",
+        title: "Email",
+        type: "string",
+        sortable: true,
+        filterable: true,
       },
       {
-        id: 7,
-        name: "Eve Adams",
-        email: "eve.adams@example.com",
-        role: "User",
-        status: "Inactive",
+        key: "isActive",
+        title: "Active",
+        type: "boolean",
+        sortable: true,
+        filterable: true,
       },
       {
-        id: 8,
-        name: "Frank Miller",
-        email: "frank.miller@example.com",
-        role: "Moderator",
-        status: "Active",
+        key: "joinDate",
+        title: "Join Date",
+        type: "date",
+        sortable: true,
+        filterable: true,
+      },
+      {
+        key: "website",
+        title: "Website",
+        type: "link",
+        sortable: false,
+        filterable: false,
+        openInNewTab: true,
+        showValueAsLinkIcon: false,
       },
     ],
+    data: sampleData,
     bordered: true,
-    striped: true,
-    hoverable: true,
-    title: "Large Dataset Table",
+    editable: true,
+    searchable: true,
+  },
+};
+
+// Table with Pagination
+export const WithPagination: Story = {
+  args: {
+    ...Basic.args,
+    bordered: true,
+    searchable: true,
+    pagination: {
+      page: 1,
+      pageSize: 3,
+      showSizeChanger: true,
+      showQuickJumper: true,
+      showTotal: (total: number, range: [number, number]) =>
+        `${range[0]}-${range[1]} of ${total} items`,
+    },
+  },
+};
+
+// Loading State
+export const Loading: Story = {
+  args: {
+    ...Basic.args,
+    loading: true,
+  },
+};
+
+// Empty State
+export const Empty: Story = {
+  args: {
+    ...Basic.args,
+    data: [],
+  },
+};
+
+// Large Dataset
+export const LargeDataset: Story = {
+  args: {
+    ...Basic.args,
+    bordered: true,
+    searchable: true,
+    selectable: true,
+    pagination: {
+      page: 1,
+      pageSize: 10,
+      showSizeChanger: true,
+      showQuickJumper: true,
+    },
+    data: Array.from({ length: 100 }, (_, index) => ({
+      id: `${index + 1}`,
+      name: `User ${index + 1}`,
+      email: `user${index + 1}@example.com`,
+      age: 20 + (index % 40),
+      isActive: index % 3 === 0,
+      joinDate: dayjs().subtract(index, "days"),
+      department: ["Engineering", "Marketing", "Sales", "HR"][index % 4],
+      salary: 50000 + index * 1000,
+      website: `https://user${index + 1}.com`,
+    })),
+  },
+};
+
+// Custom Render Function
+export const WithCustomRender: Story = {
+  args: {
+    columns: [
+      {
+        key: "name",
+        title: "Name",
+        type: "string",
+        sortable: true,
+      },
+      {
+        key: "salary",
+        title: "Salary",
+        type: "number",
+        sortable: true,
+        render: (data: TableData) =>
+          React.createElement(
+            "span",
+            {
+              style: {
+                color: (data.salary as number) > 70000 ? "green" : "red",
+                fontWeight: "bold",
+              },
+            },
+            `$${(data.salary as number).toLocaleString()}`
+          ),
+      },
+      {
+        key: "department",
+        title: "Department",
+        type: "string",
+        sortable: true,
+        render: (data: TableData) =>
+          React.createElement(
+            "span",
+            {
+              style: {
+                backgroundColor:
+                  data.department === "Engineering" ? "#e3f2fd" : "#f3e5f5",
+                padding: "4px 8px",
+                borderRadius: "4px",
+                fontSize: "12px",
+              },
+            },
+            String(data.department)
+          ),
+      },
+    ],
+    data: sampleData,
+    bordered: true,
+  },
+};
+
+// Table with Scroll
+export const WithScroll: Story = {
+  args: {
+    ...Basic.args,
+    bordered: true,
+    scroll: {
+      x: 800,
+      y: 300,
+    },
+    data: sampleData.map((item) => ({
+      ...item,
+      longDescription:
+        "This is a very long description that will cause horizontal scrolling when the table width is constrained.",
+      additionalField1: "Extra Field 1",
+      additionalField2: "Extra Field 2",
+      additionalField3: "Extra Field 3",
+    })),
+    columns: [
+      ...basicColumns,
+      {
+        key: "longDescription",
+        title: "Long Description",
+        type: "string",
+        width: 200,
+      },
+      {
+        key: "additionalField1",
+        title: "Additional Field 1",
+        type: "string",
+      },
+      {
+        key: "additionalField2",
+        title: "Additional Field 2",
+        type: "string",
+      },
+      {
+        key: "additionalField3",
+        title: "Additional Field 3",
+        type: "string",
+      },
+    ],
   },
 };

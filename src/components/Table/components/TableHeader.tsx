@@ -133,7 +133,7 @@ const TableHeader: React.FC<TableHeaderProps> = ({
             </Button>
           )}
           <Button
-            type="primary"
+            type="default"
             icon={<FaEye />}
             onClick={toggleColumnsSidebar}
           >
