@@ -239,6 +239,13 @@ const Table: React.FC<TableProps> = ({
                 .includes(filterValue.toLowerCase().trim())
             );
           }
+          if (typeof filterValue === "string" && typeof dValue === "number") {
+            matches.push(
+              dValue
+                .toString()
+                .includes(filterValue.toString().toLowerCase().trim())
+            );
+          }
         });
         return matches.every((match) => match === true);
       });
@@ -424,7 +431,7 @@ const Table: React.FC<TableProps> = ({
   useEffect(() => {
     setTableData(data);
   }, [data]);
-  console.log(localColumns);
+
   return (
     <div className="w-full h-full">
       <TableHeader

@@ -4,7 +4,7 @@ import Table, {
   type TableData,
 } from "../components/Table/Table";
 import dayjs from "dayjs";
-import React from "react";
+import React, { useState } from "react";
 import "./table.css";
 
 // Sample data for stories
@@ -103,6 +103,52 @@ const basicColumns: TableColumn[] = [
     filterable: true,
   },
 ];
+
+// Wrapper component for pagination stories
+const PaginationWrapper: React.FC<{
+  columns: TableColumn[];
+  data: TableData[];
+  bordered?: boolean;
+  searchable?: boolean;
+  selectable?: boolean;
+  initialPageSize?: number;
+}> = ({
+  columns,
+  data,
+  bordered,
+  searchable,
+  selectable,
+  initialPageSize = 3,
+}) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(initialPageSize);
+
+  const handlePageChange = (page: number, size?: number) => {
+    setCurrentPage(page);
+    if (size && size !== pageSize) {
+      setPageSize(size);
+      setCurrentPage(1); // Reset to first page when page size changes
+    }
+  };
+
+  return React.createElement(Table, {
+    columns,
+    data,
+    bordered,
+    searchable,
+    selectable,
+    pagination: {
+      page: currentPage,
+      pageSize: pageSize,
+      showSizeChanger: true,
+      showQuickJumper: true,
+      showTotal: (total: number, range: [number, number]) =>
+        `${range[0]}-${range[1]} of ${total} items`,
+      onChange: handlePageChange,
+      onShowSizeChange: handlePageChange,
+    },
+  });
+};
 
 const meta: Meta<typeof Table> = {
   title: "Components/Table",
@@ -269,18 +315,15 @@ export const WithCellTypes: Story = {
 
 // Table with Pagination
 export const WithPagination: Story = {
+  render: (args) =>
+    React.createElement(PaginationWrapper, {
+      columns: args.columns,
+      data: args.data,
+      bordered: true,
+      searchable: true,
+    }),
   args: {
     ...Basic.args,
-    bordered: true,
-    searchable: true,
-    pagination: {
-      page: 1,
-      pageSize: 3,
-      showSizeChanger: true,
-      showQuickJumper: true,
-      showTotal: (total: number, range: [number, number]) =>
-        `${range[0]}-${range[1]} of ${total} items`,
-    },
   },
 };
 
@@ -302,17 +345,17 @@ export const Empty: Story = {
 
 // Large Dataset
 export const LargeDataset: Story = {
+  render: (args) =>
+    React.createElement(PaginationWrapper, {
+      columns: args.columns,
+      data: args.data,
+      bordered: true,
+      searchable: true,
+      selectable: true,
+      initialPageSize: 10,
+    }),
   args: {
     ...Basic.args,
-    bordered: true,
-    searchable: true,
-    selectable: true,
-    pagination: {
-      page: 1,
-      pageSize: 10,
-      showSizeChanger: true,
-      showQuickJumper: true,
-    },
     data: Array.from({ length: 100 }, (_, index) => ({
       id: `${index + 1}`,
       name: `User ${index + 1}`,
