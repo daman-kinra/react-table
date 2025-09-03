@@ -207,17 +207,10 @@ const Table: React.FC<TableProps> = ({
     }
   };
 
-  const getTableDataToRender = () => {
-    if (filteredTableData.length === 0) return [];
-    let tableDataToRender = filteredTableData;
+  const getTableDataToRender = (filteredTableDataArgs: TableData[]) => {
+    if (filteredTableDataArgs.length === 0) return [];
+    let tableDataToRender = [...filteredTableDataArgs];
 
-    if (pagination?.page && pagination?.pageSize) {
-      const start = (pagination?.page - 1) * (pagination?.pageSize || 0);
-      const end = pagination?.page * (pagination?.pageSize || 0);
-      tableDataToRender = filteredTableData.slice(start, end);
-    } else {
-      tableDataToRender = filteredTableData;
-    }
     if (sortColumn && sortDirection) {
       tableDataToRender = orderBy(tableDataToRender, sortColumn, sortDirection);
     }
@@ -249,11 +242,20 @@ const Table: React.FC<TableProps> = ({
         return matches.every((match) => match === true);
       });
     }
+
+    if (pagination?.page && pagination?.pageSize) {
+      const start = (pagination?.page - 1) * (pagination?.pageSize || 0);
+      const end = pagination?.page * (pagination?.pageSize || 0);
+      tableDataToRender = tableDataToRender.slice(start, end);
+    } else {
+      tableDataToRender = [...tableDataToRender];
+    }
+
     return tableDataToRender;
   };
 
   const renderTable = () => {
-    const tableDataToRender = getTableDataToRender();
+    const tableDataToRender = getTableDataToRender(filteredTableData);
     if (isEmpty(tableDataToRender)) {
       return (
         <div className="w-full h-full flex justify-center items-center border border-solid border-gray-200 py-10">
