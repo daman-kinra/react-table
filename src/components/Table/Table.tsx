@@ -46,7 +46,7 @@ export type TableProps = {
   editable?: boolean;
   selectable?: boolean;
   searchable?: boolean;
-  // resizable?: boolean;
+  resizable?: boolean;
   pagination?: PaginationProps & {
     page: number;
   };
@@ -67,7 +67,7 @@ const Table: React.FC<TableProps> = ({
   editable = false,
   selectable = false,
   searchable = false,
-  // resizable = false,
+  resizable = false,
   pagination,
   scroll,
 }) => {
@@ -83,6 +83,60 @@ const Table: React.FC<TableProps> = ({
   const [localColumns, setLocalColumns] = useState<TableColumn[]>(
     columns?.map((column) => ({ ...column, isHidden: false }))
   );
+  const [columnWidths, setColumnWidths] = useState<{ [key: string]: number }>(
+    {}
+  );
+
+  // Initialize column widths from column definitions
+  useEffect(() => {
+    const initialWidths: { [key: string]: number } = {};
+    columns.forEach((column) => {
+      if (column.width) {
+        initialWidths[column.key] = column.width;
+      }
+    });
+    setColumnWidths(initialWidths);
+  }, [columns]);
+
+  const handleResizeStart = (e: React.MouseEvent, columnKey: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const startX = e.clientX;
+    const startWidth = columnWidths[columnKey] || 150;
+
+    const handleResizeMove = (e: MouseEvent) => {
+      e.stopPropagation();
+
+      const deltaX = e.clientX - startX;
+      const newWidth = Math.max(50, startWidth + deltaX); // Minimum width of 50px
+
+      setColumnWidths((prev) => ({
+        ...prev,
+        [columnKey]: newWidth,
+      }));
+    };
+
+    const handleResizeEnd = (e: MouseEvent) => {
+      e.stopPropagation();
+
+      // Remove global event listeners
+      document.removeEventListener("mousemove", handleResizeMove);
+      document.removeEventListener("mouseup", handleResizeEnd);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+
+    // Add global event listeners
+    document.addEventListener("mousemove", handleResizeMove);
+    document.addEventListener("mouseup", handleResizeEnd);
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+  };
+
+  const getColumnWidth = (column: TableColumn): number => {
+    return columnWidths[column.key] || column.width || 150;
+  };
 
   const handleCellUpdate = (
     column: TableColumn,
@@ -270,7 +324,7 @@ const Table: React.FC<TableProps> = ({
         })}
       >
         <thead
-          className={clsx("bg-gray-50", {
+          className={clsx("bg-gray-100", {
             "sticky top-0 z-10": headerSticky,
           })}
         >
@@ -290,11 +344,12 @@ const Table: React.FC<TableProps> = ({
             )}
             {localColumns.map((column) => {
               if (column.isHidden) return null;
+              const columnWidth = getColumnWidth(column);
               return (
                 <th
                   key={column.key}
                   className={clsx(
-                    "px-6 py-3 text-left text-base font-semibold text-gray-700 tracking-wider whitespace-nowrap group",
+                    "px-6 py-3 text-left text-base font-semibold text-gray-700 tracking-wider whitespace-nowrap group relative",
                     {
                       "border-l border-solid border-gray-200": bordered,
                       "cursor-pointer": column.sortable,
@@ -306,8 +361,9 @@ const Table: React.FC<TableProps> = ({
                     }
                   }}
                   style={{
-                    width: column.width ? `${column.width}px` : "unset",
-                    maxWidth: column.width ? `${column.width}px` : "unset",
+                    width: `${columnWidth}px`,
+                    maxWidth: `${columnWidth}px`,
+                    minWidth: `${columnWidth}px`,
                   }}
                 >
                   <div className="flex justify-between items-center gap-2">
@@ -328,6 +384,13 @@ const Table: React.FC<TableProps> = ({
                       </>
                     )}
                   </div>
+                  {resizable && (
+                    <div
+                      className="absolute top-0 right-0 w-4 h-full cursor-col-resize hover:bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onMouseDown={(e) => handleResizeStart(e, column.key)}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  )}
                 </th>
               );
             })}
@@ -351,6 +414,7 @@ const Table: React.FC<TableProps> = ({
               )}
               {localColumns.map((column) => {
                 if (column.isHidden) return null;
+                const columnWidth = getColumnWidth(column);
                 return (
                   <td
                     key={column.key}
@@ -358,8 +422,9 @@ const Table: React.FC<TableProps> = ({
                       "border-l border-solid border-gray-200": bordered,
                     })}
                     style={{
-                      width: column.width ? `${column.width}px` : "unset",
-                      maxWidth: column.width ? `${column.width}px` : "unset",
+                      width: `${columnWidth}px`,
+                      maxWidth: `${columnWidth}px`,
+                      minWidth: `${columnWidth}px`,
                     }}
                   >
                     {renderCell(column, row)}
@@ -414,6 +479,7 @@ const Table: React.FC<TableProps> = ({
       }
       return false;
     });
+
     setFilteredTableData(filteredData);
   };
 
@@ -432,6 +498,14 @@ const Table: React.FC<TableProps> = ({
   useEffect(() => {
     setTableData(data);
   }, [data]);
+
+  // Cleanup event listeners on unmount
+  useEffect(() => {
+    return () => {
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+  }, []);
 
   return (
     <div className="w-full h-full">

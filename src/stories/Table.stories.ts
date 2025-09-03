@@ -187,6 +187,10 @@ const meta: Meta<typeof Table> = {
       control: "boolean",
       description: "Enables search functionality",
     },
+    resizable: {
+      control: "boolean",
+      description: "Enables column resizing functionality",
+    },
     headerSticky: {
       control: "boolean",
       description: "Makes table header sticky",
@@ -261,6 +265,7 @@ export const FullFeatured: Story = {
     editable: true,
     deletable: true,
     searchable: true,
+    resizable: true,
   },
 };
 
@@ -420,6 +425,57 @@ export const WithCustomRender: Story = {
     ],
     data: sampleData,
     bordered: true,
+  },
+};
+
+// Resizable Columns Table
+export const ResizableColumns: Story = {
+  args: {
+    ...Basic.args,
+    bordered: true,
+    resizable: true,
+    columns: [
+      {
+        key: "name",
+        title: "Name",
+        type: "string",
+        sortable: true,
+        filterable: true,
+        width: 150,
+      },
+      {
+        key: "email",
+        title: "Email Address",
+        type: "string",
+        sortable: true,
+        filterable: true,
+        width: 200,
+      },
+      {
+        key: "age",
+        title: "Age",
+        type: "number",
+        sortable: true,
+        filterable: true,
+        width: 80,
+      },
+      {
+        key: "department",
+        title: "Department",
+        type: "string",
+        sortable: true,
+        filterable: true,
+        width: 120,
+      },
+      {
+        key: "salary",
+        title: "Annual Salary",
+        type: "number",
+        sortable: true,
+        filterable: true,
+        width: 130,
+      },
+    ],
   },
 };
 

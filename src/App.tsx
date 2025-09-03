@@ -26,6 +26,7 @@ const App = () => {
           deletable={true}
           searchable={true}
           selectable={true}
+          resizable={true}
           scroll={{ x: 1500, y: 500 }}
           pagination={{
             page: page,
