@@ -3,7 +3,7 @@ import dayjs, { Dayjs } from "dayjs";
 import React from "react";
 
 type Props = {
-  value: Date;
+  value: Dayjs;
   editable: boolean;
   onUpdate: (value: Dayjs) => void;
 };

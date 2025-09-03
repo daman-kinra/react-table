@@ -8,11 +8,11 @@ const App = () => {
   const [pageSize, setPageSize] = useState(10);
 
   const columns: TableColumn[] = [
-    { key: "id", title: "ID" },
-    { key: "name", title: "Name" },
-    { key: "email", title: "Email" },
-    { key: "active", title: "Active", type: "boolean" },
-    { key: "createdAt", title: "Created At", type: "date" },
+    { key: "id", title: "ID", sortable: true },
+    { key: "name", title: "Name", sortable: true },
+    { key: "email", title: "Email", sortable: true },
+    { key: "active", title: "Active", type: "boolean", sortable: true },
+    { key: "createdAt", title: "Created At", type: "date", sortable: true },
   ];
 
   const data: TableData[] = [

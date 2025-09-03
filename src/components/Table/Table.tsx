@@ -8,12 +8,15 @@ import TableHeader from "./components/TableHeader";
 import type { Dayjs } from "dayjs";
 import { Button, Checkbox, Empty, Spin, type PaginationProps } from "antd";
 import Pagination from "./components/Pagination";
+import { FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
+import orderBy from "lodash/orderBy";
 
 export type TableColumn = {
   key: string;
   title: string;
   width?: number;
   type?: "string" | "number" | "boolean" | "date" | "link";
+  sortable?: boolean;
   link?: string; // Only for link type
   openInNewTab?: boolean; // Only for link type
   showValueAsLinkIcon?: boolean; // Only for link type
@@ -57,6 +60,7 @@ const Table: React.FC<TableProps> = ({
   editable = false,
   selectable = false,
   searchable = false,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   resizable = false,
   pagination,
   scroll,
@@ -65,6 +69,10 @@ const Table: React.FC<TableProps> = ({
   const [filteredTableData, setFilteredTableData] = useState<TableData[]>(data);
   const [search, setSearch] = useState<string>("");
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
+  const [sortColumn, setSortColumn] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc" | null>(
+    null
+  );
 
   const handleCellUpdate = (
     column: TableColumn,
@@ -133,6 +141,17 @@ const Table: React.FC<TableProps> = ({
     setSelectedRows(newSelectedRows);
   };
 
+  const handleSort = (column: TableColumn) => {
+    setSortColumn(column.key);
+    if (sortDirection === "asc") {
+      setSortDirection("desc");
+    } else if (sortDirection === "desc") {
+      setSortDirection(null);
+    } else {
+      setSortDirection("asc");
+    }
+  };
+
   const isAllSelected = selectedRows.size === tableData.length;
   const isIndeterminate = selectedRows.size > 0 && !isAllSelected;
 
@@ -152,7 +171,7 @@ const Table: React.FC<TableProps> = ({
       case "date":
         return (
           <DateCell
-            value={row[column.key] as any}
+            value={row[column.key] as Dayjs}
             editable={editable}
             onUpdate={(value) => handleCellUpdate(column, row, value as Dayjs)}
           />
@@ -194,6 +213,10 @@ const Table: React.FC<TableProps> = ({
     } else {
       tableDataToRender = filteredTableData;
     }
+    if (sortColumn && sortDirection) {
+      tableDataToRender = orderBy(tableDataToRender, sortColumn, sortDirection);
+    }
+
     return (
       <table
         className={clsx("min-w-full h-fit", {
@@ -223,17 +246,34 @@ const Table: React.FC<TableProps> = ({
               <th
                 key={column.key}
                 className={clsx(
-                  "px-6 py-3 text-left text-base font-semibold text-gray-700 tracking-wider whitespace-nowrap",
+                  "px-6 py-3 text-left text-base font-semibold text-gray-700 tracking-wider whitespace-nowrap cursor-pointer group",
                   {
                     "border-l border-solid border-gray-200": bordered,
                   }
                 )}
+                onClick={() => handleSort(column)}
                 style={{
                   width: column.width ? `${column.width}px` : "unset",
                   maxWidth: column.width ? `${column.width}px` : "unset",
                 }}
               >
-                {column.title}
+                <div className="flex justify-between items-center gap-2">
+                  {column.title}
+                  {column.sortable && (
+                    <>
+                      {(!sortDirection || sortColumn !== column.key) && (
+                        <FaSort className="text-gray-300 group-hover:text-blue-500 transition-all" />
+                      )}
+                      {sortColumn === column.key && sortDirection === "asc" && (
+                        <FaSortUp className="text-blue-500" />
+                      )}
+                      {sortColumn === column.key &&
+                        sortDirection === "desc" && (
+                          <FaSortDown className="text-blue-500" />
+                        )}
+                    </>
+                  )}
+                </div>
               </th>
             ))}
             {deletable && <th>Actions</th>}
@@ -269,7 +309,14 @@ const Table: React.FC<TableProps> = ({
                 </td>
               ))}
               {deletable && (
-                <td>
+                <td
+                  className={clsx("px-6 py-4", {
+                    "border-l border-solid border-gray-200": bordered,
+                  })}
+                  style={{
+                    width: "100px",
+                  }}
+                >
                   <Button
                     type="primary"
                     danger
