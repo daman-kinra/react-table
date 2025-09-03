@@ -22,6 +22,7 @@ export type TableColumn = {
   openInNewTab?: boolean; // Only for link type
   showValueAsLinkIcon?: boolean; // Only for link type
   filterable?: boolean;
+  isHidden?: boolean;
   render?: (data: TableData) => React.ReactNode;
 };
 
@@ -80,6 +81,9 @@ const Table: React.FC<TableProps> = ({
     null
   );
   const [filters, setFilters] = useState<TableFilters>({});
+  const [localColumns, setLocalColumns] = useState<TableColumn[]>(
+    columns?.map((column) => ({ ...column, isHidden: false }))
+  );
 
   const handleCellUpdate = (
     column: TableColumn,
@@ -276,45 +280,49 @@ const Table: React.FC<TableProps> = ({
                 />
               </th>
             )}
-            {columns.map((column) => (
-              <th
-                key={column.key}
-                className={clsx(
-                  "px-6 py-3 text-left text-base font-semibold text-gray-700 tracking-wider whitespace-nowrap group",
-                  {
-                    "border-l border-solid border-gray-200": bordered,
-                    "cursor-pointer": column.sortable,
-                  }
-                )}
-                onClick={() => {
-                  if (column.sortable) {
-                    handleSort(column);
-                  }
-                }}
-                style={{
-                  width: column.width ? `${column.width}px` : "unset",
-                  maxWidth: column.width ? `${column.width}px` : "unset",
-                }}
-              >
-                <div className="flex justify-between items-center gap-2">
-                  {column.title}
-                  {column.sortable && (
-                    <>
-                      {(!sortDirection || sortColumn !== column.key) && (
-                        <FaSort className="text-gray-300 group-hover:text-blue-500 transition-all" />
-                      )}
-                      {sortColumn === column.key && sortDirection === "asc" && (
-                        <FaSortUp className="text-blue-500" />
-                      )}
-                      {sortColumn === column.key &&
-                        sortDirection === "desc" && (
-                          <FaSortDown className="text-blue-500" />
-                        )}
-                    </>
+            {localColumns.map((column) => {
+              if (column.isHidden) return null;
+              return (
+                <th
+                  key={column.key}
+                  className={clsx(
+                    "px-6 py-3 text-left text-base font-semibold text-gray-700 tracking-wider whitespace-nowrap group",
+                    {
+                      "border-l border-solid border-gray-200": bordered,
+                      "cursor-pointer": column.sortable,
+                    }
                   )}
-                </div>
-              </th>
-            ))}
+                  onClick={() => {
+                    if (column.sortable) {
+                      handleSort(column);
+                    }
+                  }}
+                  style={{
+                    width: column.width ? `${column.width}px` : "unset",
+                    maxWidth: column.width ? `${column.width}px` : "unset",
+                  }}
+                >
+                  <div className="flex justify-between items-center gap-2">
+                    {column.title}
+                    {column.sortable && (
+                      <>
+                        {(!sortDirection || sortColumn !== column.key) && (
+                          <FaSort className="text-gray-300 group-hover:text-blue-500 transition-all" />
+                        )}
+                        {sortColumn === column.key &&
+                          sortDirection === "asc" && (
+                            <FaSortUp className="text-blue-500" />
+                          )}
+                        {sortColumn === column.key &&
+                          sortDirection === "desc" && (
+                            <FaSortDown className="text-blue-500" />
+                          )}
+                      </>
+                    )}
+                  </div>
+                </th>
+              );
+            })}
             {deletable && <th>Actions</th>}
           </tr>
         </thead>
@@ -333,20 +341,23 @@ const Table: React.FC<TableProps> = ({
                   />
                 </th>
               )}
-              {columns.map((column) => (
-                <td
-                  key={column.key}
-                  className={clsx("px-6 py-4", {
-                    "border-l border-solid border-gray-200": bordered,
-                  })}
-                  style={{
-                    width: column.width ? `${column.width}px` : "unset",
-                    maxWidth: column.width ? `${column.width}px` : "unset",
-                  }}
-                >
-                  {renderCell(column, row)}
-                </td>
-              ))}
+              {localColumns.map((column) => {
+                if (column.isHidden) return null;
+                return (
+                  <td
+                    key={column.key}
+                    className={clsx("px-6 py-4", {
+                      "border-l border-solid border-gray-200": bordered,
+                    })}
+                    style={{
+                      width: column.width ? `${column.width}px` : "unset",
+                      maxWidth: column.width ? `${column.width}px` : "unset",
+                    }}
+                  >
+                    {renderCell(column, row)}
+                  </td>
+                );
+              })}
               {deletable && (
                 <td
                   className={clsx("px-6 py-4", {
@@ -413,14 +424,15 @@ const Table: React.FC<TableProps> = ({
   useEffect(() => {
     setTableData(data);
   }, [data]);
-
+  console.log(localColumns);
   return (
     <div className="w-full h-full">
       <TableHeader
         searchable={searchable}
         setFilters={setFilters}
         filters={filters}
-        columns={columns}
+        localColumns={localColumns}
+        setLocalColumns={setLocalColumns}
         setSearch={setSearch}
         search={search}
         showDeleteSelected={deletable && selectedRows.size > 0}
