@@ -188,6 +188,10 @@ const TableHeader: React.FC<TableHeaderProps> = ({
         placement="right"
         width="min(90%, 410px)"
       >
+        <h3 className="text-base text-gray-700 mb-4">
+          {" "}
+          Select Columns you want to hide
+        </h3>
         <Form form={columnsForm}>
           {localColumns.map((column) => {
             return (
