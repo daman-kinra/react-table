@@ -467,7 +467,7 @@ const Table: React.FC<TableProps> = ({
   };
 
   const handleSearch = () => {
-    const filteredData = filteredTableData.map((d) => {
+    const filteredData = tableData.map((d) => {
       for (const key in d) {
         if (typeof d[key] !== "string") {
           continue;
