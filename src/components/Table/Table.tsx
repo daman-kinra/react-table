@@ -11,6 +11,7 @@ import Pagination from "./components/Pagination";
 import { FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
 import orderBy from "lodash/orderBy";
 import isEmpty from "lodash/isEmpty";
+import { RxDragHandleDots2 } from "react-icons/rx";
 
 export type TableColumn = {
   key: string;
@@ -385,10 +386,12 @@ const Table: React.FC<TableProps> = ({
                   </div>
                   {resizable && (
                     <div
-                      className="absolute top-0 right-0 w-4 h-full cursor-col-resize hover:bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute top-0 right-0 w-4 h-full cursor-col-resize bg-gray-400 opacity-80 group-hover:opacity-100 transition-opacity flex justify-center items-center"
                       onMouseDown={(e) => handleResizeStart(e, column.key)}
                       onClick={(e) => e.stopPropagation()}
-                    />
+                    >
+                      <RxDragHandleDots2 className="text-neutral-50 text-2xl" />
+                    </div>
                   )}
                 </th>
               );
