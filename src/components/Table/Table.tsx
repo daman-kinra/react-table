@@ -308,6 +308,15 @@ const Table: React.FC<TableProps> = ({
     return tableDataToRender;
   };
 
+  const renderLoading = () => {
+    if (!loading) return null;
+    return (
+      <div className="absolute inset-0 flex justify-center items-center backdrop-blur-xs z-10 border border-solid border-gray-200">
+        <Spin />
+      </div>
+    );
+  };
+
   const renderTable = () => {
     const tableDataToRender = getTableDataToRender(filteredTableData);
     if (isEmpty(tableDataToRender)) {
@@ -319,7 +328,7 @@ const Table: React.FC<TableProps> = ({
     }
     return (
       <table
-        className={clsx("min-w-full h-fit", {
+        className={clsx("min-w-full h-fit relative z-0", {
           "border border-solid border-gray-200": bordered,
         })}
       >
@@ -454,15 +463,8 @@ const Table: React.FC<TableProps> = ({
             </tr>
           ))}
         </tbody>
+        {loading && renderLoading()}
       </table>
-    );
-  };
-  const renderLoading = () => {
-    if (!loading) return null;
-    return (
-      <div className="absolute inset-0 flex justify-center items-center backdrop-blur-xs z-10 border border-solid border-gray-200">
-        <Spin />
-      </div>
     );
   };
 
@@ -537,7 +539,6 @@ const Table: React.FC<TableProps> = ({
             height: scroll?.y ? `${scroll?.y}px` : "unset",
           }}
         >
-          {renderLoading()}
           {renderTable()}
         </div>
       </div>
