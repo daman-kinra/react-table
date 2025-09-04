@@ -304,7 +304,6 @@ const Table: React.FC<TableProps> = ({
     } else {
       tableDataToRender = [...tableDataToRender];
     }
-
     return tableDataToRender;
   };
 
@@ -465,22 +464,22 @@ const Table: React.FC<TableProps> = ({
   };
 
   const handleSearch = () => {
-    const filteredData = tableData.filter((d) => {
+    const filteredData = filteredTableData.map((d) => {
+      if (!d) return null;
       for (const key in d) {
         if (typeof d[key] !== "string") {
           continue;
         }
-
         if (
           d[key].toString().toLowerCase().includes(search.toLowerCase()?.trim())
         ) {
-          return true;
+          return d;
         }
       }
-      return false;
+      return null;
     });
-
-    setFilteredTableData(filteredData);
+    console.log(filteredData);
+    setFilteredTableData(filteredData.filter((d) => d !== null));
   };
 
   useEffect(() => {
@@ -532,6 +531,7 @@ const Table: React.FC<TableProps> = ({
         <div
           className="w-full h-full relative z-0"
           style={{
+            minWidth: 1000,
             width: scroll?.x ? `${scroll?.x}px` : "unset",
             height: scroll?.y ? `${scroll?.y}px` : "unset",
           }}

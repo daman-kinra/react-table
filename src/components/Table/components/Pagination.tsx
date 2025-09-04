@@ -11,13 +11,15 @@ type PaginationProps = {
 
 const Pagination: React.FC<PaginationProps> = ({ pagination, total }) => {
   return (
-    <div className="w-full p-4 bg-white flex justify-end items-center">
+    <div className="w-full min-h-fit p-4 bg-white flex justify-end items-center">
       <PaginationAntd
         {...pagination}
+        className="w-full"
+        responsive
         total={total}
-        showTotal={(total, range) =>
-          `${range[0]}-${range[1]} of ${total} items`
-        }
+        showTotal={(total, range) => (
+          <span className="text-sm block text-gray-500 truncate w-16 md:w-full">{`${range[0]}-${range[1]} of ${total} items`}</span>
+        )}
       />
     </div>
   );

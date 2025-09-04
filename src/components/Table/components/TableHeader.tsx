@@ -122,7 +122,7 @@ const TableHeader: React.FC<TableHeaderProps> = ({
   return (
     <>
       <div className="w-full h-full border border-gray-200 bg-neutral-50 grid grid-cols-2 gap-4 p-4">
-        <div className="col-span-1 flex items-center gap-2">
+        <div className="col-span-2 md:col-span-1 flex items-center gap-2 flex-wrap">
           {isFilterable && (
             <Button
               type="primary"
@@ -146,7 +146,7 @@ const TableHeader: React.FC<TableHeaderProps> = ({
           )}
         </div>
         {searchable && (
-          <div className="col-span-1">
+          <div className="col-span-2 md:col-span-1">
             <Input
               value={localSearch}
               onChange={handleSearch}
