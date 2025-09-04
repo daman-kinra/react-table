@@ -11,7 +11,7 @@ type PaginationProps = {
 
 const Pagination: React.FC<PaginationProps> = ({ pagination, total }) => {
   return (
-    <div className="w-full min-h-fit p-4 bg-white flex justify-end items-center">
+    <div className="w-full min-h-fit p-4 bg-white flex justify-end items-center border border-solid border-gray-200 rounded-b-md">
       <PaginationAntd
         {...pagination}
         className="w-full"

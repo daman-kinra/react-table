@@ -6,9 +6,9 @@ import BooleanCell from "./components/cells/BooleanCell";
 import DateCell from "./components/cells/DateCell";
 import TableHeader from "./components/TableHeader";
 import type { Dayjs } from "dayjs";
-import { Button, Checkbox, Empty, Spin, type PaginationProps } from "antd";
+import { Checkbox, Empty, Spin, Tooltip, type PaginationProps } from "antd";
 import Pagination from "./components/Pagination";
-import { FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
+import { FaSort, FaSortDown, FaSortUp, FaTrash } from "react-icons/fa";
 import orderBy from "lodash/orderBy";
 import isEmpty from "lodash/isEmpty";
 import { RxDragHandleDots2 } from "react-icons/rx";
@@ -28,7 +28,7 @@ export type TableColumn = {
 };
 
 export type TableData = {
-  [key: string]: string | number | boolean | Dayjs;
+  [key: string]: string | number | boolean | Dayjs | string[];
 };
 
 export type TableScroll = {
@@ -221,7 +221,7 @@ const Table: React.FC<TableProps> = ({
   const isIndeterminate = selectedRows.size > 0 && !isAllSelected;
 
   const renderCell = (column: TableColumn, row: TableData): React.ReactNode => {
-    if (column.render) {
+    if (column.render && typeof column.render === "function") {
       return column.render(row);
     }
     switch (column.type) {
@@ -334,7 +334,7 @@ const Table: React.FC<TableProps> = ({
       >
         <thead
           className={clsx("bg-gray-100", {
-            "sticky top-0 z-10": headerSticky,
+            "sticky top-[-1px] z-10": headerSticky,
           })}
         >
           <tr>
@@ -342,6 +342,8 @@ const Table: React.FC<TableProps> = ({
               <th
                 style={{
                   width: "50px",
+                  minWidth: "50px",
+                  maxWidth: "50px",
                 }}
               >
                 <Checkbox
@@ -351,17 +353,22 @@ const Table: React.FC<TableProps> = ({
                 />
               </th>
             )}
-            {localColumns.map((column) => {
+            {localColumns.map((column, index) => {
               if (column.isHidden) return null;
               const columnWidth = getColumnWidth(column);
               return (
                 <th
-                  key={column.key}
+                  key={String(Math.random())}
                   className={clsx(
                     "px-6 py-3 text-left text-base font-semibold text-gray-700 tracking-wider whitespace-nowrap group relative",
                     {
                       "border-l border-solid border-gray-200": bordered,
                       "cursor-pointer": column.sortable,
+                      "sticky left-[-1px] z-10 bg-gray-100 shadow": index === 0,
+                      boxShadow:
+                        index === 0
+                          ? "inset -10px 0 8px -8px #0000000d"
+                          : "none",
                     }
                   )}
                   onClick={() => {
@@ -380,7 +387,7 @@ const Table: React.FC<TableProps> = ({
                     {column.sortable && (
                       <>
                         {(!sortDirection || sortColumn !== column.key) && (
-                          <FaSort className="text-gray-300 group-hover:text-blue-500 transition-all" />
+                          <FaSort className="text-gray-300 group-hover:text-gray-500 transition-all" />
                         )}
                         {sortColumn === column.key &&
                           sortDirection === "asc" && (
@@ -395,11 +402,11 @@ const Table: React.FC<TableProps> = ({
                   </div>
                   {resizable && (
                     <div
-                      className="absolute top-0 right-0 w-4 h-full cursor-col-resize bg-gray-400 opacity-80 group-hover:opacity-100 transition-opacity flex justify-center items-center"
+                      className="absolute top-0 right-0 h-full cursor-col-resize group-hover:cursor-col-resize group-hover:bg-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex justify-center items-center"
                       onMouseDown={(e) => handleResizeStart(e, column.key)}
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <RxDragHandleDots2 className="text-neutral-50 text-2xl" />
+                      <RxDragHandleDots2 className="text-neutral-50 text-base" />
                     </div>
                   )}
                 </th>
@@ -410,7 +417,12 @@ const Table: React.FC<TableProps> = ({
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
           {tableDataToRender.map((row, index) => (
-            <tr key={index} className="hover:bg-gray-50">
+            <tr
+              key={index}
+              className={clsx("hover:bg-gray-50", {
+                "bg-blue-50": selectedRows.has(row.id as string),
+              })}
+            >
               {selectable && (
                 <th
                   style={{
@@ -423,19 +435,24 @@ const Table: React.FC<TableProps> = ({
                   />
                 </th>
               )}
-              {localColumns.map((column) => {
+              {localColumns.map((column, index) => {
                 if (column.isHidden) return null;
                 const columnWidth = getColumnWidth(column);
                 return (
                   <td
-                    key={column.key}
+                    key={String(Math.random())}
                     className={clsx("px-6 py-4", {
                       "border-l border-solid border-gray-200": bordered,
+                      "sticky left-[-1px] z-[5] bg-white": index === 0,
                     })}
                     style={{
                       width: `${columnWidth}px`,
                       maxWidth: `${columnWidth}px`,
                       minWidth: `${columnWidth}px`,
+                      boxShadow:
+                        index === 0
+                          ? "inset -10px 0 8px -8px #0000000d"
+                          : "none",
                     }}
                   >
                     {renderCell(column, row)}
@@ -449,15 +466,18 @@ const Table: React.FC<TableProps> = ({
                   })}
                   style={{
                     width: "100px",
+                    minWidth: "100px",
+                    maxWidth: "100px",
                   }}
                 >
-                  <Button
-                    type="primary"
-                    danger
-                    onClick={() => handleDelete(row)}
-                  >
-                    Delete
-                  </Button>
+                  <Tooltip title="Delete row">
+                    <span className="block w-fit m-auto">
+                      <FaTrash
+                        className="text-red-500 cursor-pointer"
+                        onClick={() => handleDelete(row)}
+                      />
+                    </span>
+                  </Tooltip>
                 </td>
               )}
             </tr>
@@ -520,6 +540,8 @@ const Table: React.FC<TableProps> = ({
         setSearch={setSearch}
         search={search}
         showDeleteSelected={deletable && selectedRows.size > 0}
+        rowsSelected={selectedRows.size}
+        totalRows={tableData.length}
         handleDeleteSelected={handleDeleteSelected}
       />
       <div

@@ -5,66 +5,16 @@ import Table, {
 } from "../components/Table/Table";
 import dayjs from "dayjs";
 import React, { useState } from "react";
-import "./table.css";
+import "../index.css";
+import { dummyData } from "../helper";
+import { Tag } from "antd";
 
-// Sample data for stories
-const sampleData: TableData[] = [
-  {
-    id: "1",
-    name: "John Doe",
-    email: "john.doe@example.com",
-    age: 28,
-    isActive: true,
-    joinDate: dayjs("2023-01-15"),
-    department: "Engineering",
-    salary: 75000,
-    website: "https://johndoe.dev",
-  },
-  {
-    id: "2",
-    name: "Jane Smith",
-    email: "jane.smith@example.com",
-    age: 32,
-    isActive: false,
-    joinDate: dayjs("2022-08-20"),
-    department: "Marketing",
-    salary: 65000,
-    website: "https://janesmith.com",
-  },
-  {
-    id: "3",
-    name: "Bob Johnson",
-    email: "bob.johnson@example.com",
-    age: 45,
-    isActive: true,
-    joinDate: dayjs("2021-03-10"),
-    department: "Sales",
-    salary: 80000,
-    website: "https://bobjohnson.net",
-  },
-  {
-    id: "4",
-    name: "Alice Brown",
-    email: "alice.brown@example.com",
-    age: 29,
-    isActive: true,
-    joinDate: dayjs("2023-06-05"),
-    department: "Engineering",
-    salary: 72000,
-    website: "https://alicebrown.io",
-  },
-  {
-    id: "5",
-    name: "Charlie Wilson",
-    email: "charlie.wilson@example.com",
-    age: 38,
-    isActive: false,
-    joinDate: dayjs("2020-11-12"),
-    department: "HR",
-    salary: 58000,
-    website: "https://charliewilson.co",
-  },
-];
+// Use dummy data from helper file
+const sampleData: TableData[] = dummyData.map((item) => ({
+  ...item,
+  joinDate: dayjs(item.joinDate), // Convert ISO string to dayjs object
+  hobbies: item.hobbies || [], // Ensure hobbies is always an array
+}));
 
 const basicColumns: TableColumn[] = [
   {
@@ -87,13 +37,27 @@ const basicColumns: TableColumn[] = [
     type: "number",
     sortable: true,
     filterable: true,
+    width: 100,
   },
+
   {
-    key: "department",
-    title: "Department",
+    key: "hobbies",
+    title: "Hobbies",
     type: "string",
-    sortable: true,
-    filterable: true,
+    width: 200,
+    render: (data: TableData) => {
+      return (
+        <div className="flex flex-wrap gap-1">
+          {(Array.isArray(data.hobbies) ? data.hobbies : []).map(
+            (hobby: string) => (
+              <Tag color="cyan" key={hobby}>
+                {hobby}
+              </Tag>
+            )
+          )}
+        </div>
+      );
+    },
   },
   {
     key: "salary",
@@ -204,7 +168,40 @@ type Story = StoryObj<typeof Table>;
 // Basic Table Story
 export const Basic: Story = {
   args: {
-    columns: basicColumns,
+    columns: [
+      ...basicColumns,
+      {
+        key: "department",
+        title: "Department",
+        type: "string",
+        sortable: true,
+        filterable: true,
+        render: (data: TableData) => {
+          const getColor = (department: string) => {
+            switch (department) {
+              case "Engineering":
+                return "orange";
+              case "Marketing":
+                return "blue";
+              case "Sales":
+                return "green";
+              case "HR":
+                return "red";
+              default:
+                return "default";
+            }
+          };
+          return (
+            <Tag
+              color={getColor(data.department as string)}
+              className="!flex items-center gap-2 w-fit"
+            >
+              {data.department as string}
+            </Tag>
+          );
+        },
+      },
+    ],
     data: sampleData,
     loading: false,
     bordered: false,
@@ -318,6 +315,90 @@ export const WithCellTypes: Story = {
   },
 };
 
+// Table with Hobbies and All Features
+export const WithHobbies: Story = {
+  args: {
+    columns: [
+      {
+        key: "name",
+        title: "Name",
+        type: "string",
+        sortable: true,
+        filterable: true,
+      },
+      {
+        key: "email",
+        title: "Email",
+        type: "string",
+        sortable: true,
+        filterable: true,
+      },
+      {
+        key: "age",
+        title: "Age",
+        type: "number",
+        sortable: true,
+        filterable: true,
+      },
+      {
+        key: "department",
+        title: "Department",
+        type: "string",
+        sortable: true,
+        filterable: true,
+      },
+      {
+        key: "hobbies",
+        title: "Hobbies",
+        type: "string",
+        sortable: false,
+        filterable: true,
+        render: (data: TableData) => {
+          const hobbies = data.hobbies as string[];
+          return hobbies ? hobbies.join(", ") : "";
+        },
+      },
+      {
+        key: "isActive",
+        title: "Active",
+        type: "boolean",
+        sortable: true,
+        filterable: true,
+      },
+      {
+        key: "joinDate",
+        title: "Join Date",
+        type: "date",
+        sortable: true,
+        filterable: true,
+      },
+      {
+        key: "salary",
+        title: "Salary",
+        type: "number",
+        sortable: true,
+        filterable: true,
+        render: (data: TableData) =>
+          React.createElement(
+            "span",
+            {
+              style: {
+                color: (data.salary as number) > 100000 ? "green" : "blue",
+                fontWeight: "bold",
+              },
+            },
+            `$${(data.salary as number).toLocaleString()}`
+          ),
+      },
+    ],
+    data: sampleData,
+    bordered: true,
+    selectable: true,
+    searchable: true,
+    resizable: true,
+  },
+};
+
 // Table with Pagination
 export const WithPagination: Story = {
   render: (args) =>
@@ -361,17 +442,7 @@ export const LargeDataset: Story = {
     }),
   args: {
     ...Basic.args,
-    data: Array.from({ length: 100 }, (_, index) => ({
-      id: `${index + 1}`,
-      name: `User ${index + 1}`,
-      email: `user${index + 1}@example.com`,
-      age: 20 + (index % 40),
-      isActive: index % 3 === 0,
-      joinDate: dayjs().subtract(index, "days"),
-      department: ["Engineering", "Marketing", "Sales", "HR"][index % 4],
-      salary: 50000 + index * 1000,
-      website: `https://user${index + 1}.com`,
-    })),
+    data: sampleData, // Use the dummy data from helper file
   },
 };
 
